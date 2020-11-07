@@ -30,7 +30,6 @@ public with sharing class JiraIntegration implements IIntegration {
 
     //Json template to use on String.format function for Object types
     public final String JsonTemplateInnerObject = '"{0}" :lcurly"name" : "{1}"rcurly';
-    public final String JsonTemplateInnerSelect = '"{0}" :lcurly"value" : "{1}"rcurly';
     //Json template to use on String.format function for String types
     public final String JsonTemplateInnerString = '"{0}" :"{1}"';
     //Json template to use on String.format function for Integer types
@@ -109,10 +108,7 @@ public with sharing class JiraIntegration implements IIntegration {
         String finalJson = JsonTemplateOuter;
         for(String s:fieldMap.keyset()){
             if(null != cUserStory.get(s) && fieldMap.get(s) != 'status'){
-                finalJson += String.format(
-                    (typeMap.get(s) == 'object' ? JsonTemplateInnerObject : 
-                     (typeMap.get(s) == 'integer' ? JsonTemplateInnerInteger : 
-                      (typeMap.get(s) == 'select' ? JsonTemplateInnerSelect : JsonTemplateInnerString))), new List<String>{fieldMap.get(s), String.escapeSingleQuotes(String.valueOf(cUserStory.get(s)))}) + ',';
+                finalJson += String.format((typeMap.get(s) == 'object' ? JsonTemplateInnerObject : (typeMap.get(s) == 'integer' ? JsonTemplateInnerInteger : JsonTemplateInnerString)), new List<String>{fieldMap.get(s), String.escapeSingleQuotes(String.valueOf(cUserStory.get(s)))}) + ',';
             }
         }
         //callout body to update Jira record which is created from field mappings under related project and current field values
@@ -170,10 +166,6 @@ public with sharing class JiraIntegration implements IIntegration {
                 if (null != currentIssue.get('fields')) {
                     Map<String, Object> fields = (Map<String, Object>) currentIssue.get('fields');
                     for (String cf : fields.keySet()) {
-                        if(cf == 'customfield_12773'){
-                            system.debug(cf + ' ' + fields.get(cf));
-                        }
-                        
                         //Prepares values from String
                         if (fields.get(cf) instanceof String || fields.get(cf) instanceof Integer || fields.get(cf) instanceof Decimal || fields.get(cf) instanceof Double || fields.get(cf) == null) {
                             keyValuepairTempMap.put(cf, String.valueOf(fields.get(cf)));
@@ -189,8 +181,6 @@ public with sharing class JiraIntegration implements IIntegration {
                                 } else keyValuepairTempMap.put(cf, (String) tempObject.get('emailAddress'));
                             } else if (null != tempObject.get('name')) {
                                 keyValuepairTempMap.put(cf, (String) tempObject.get('name'));
-                            }  else if (null != tempObject.get('value')) {
-                                keyValuepairTempMap.put(cf, (String) tempObject.get('value'));
                             }
                         }
                     }
